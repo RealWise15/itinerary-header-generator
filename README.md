@@ -98,7 +98,7 @@ Selección de colores y diseño visual de cada plantilla
 ## 👨‍💻 Autor
 Miguel Ángel Quisbert Flores
 📍 Buenos Aires, Argentina
-🔗 LinkedIn | 📧 quisbert.flores.miguel@gmail.com
+🔗 www.linkedin.com/in/miguel-quisbert-178886354 | 📧 quisbert.flores.miguel@gmail.com
 🛠️ Técnico Informático | Estudiante de Análisis de Sistemas | Full Stack Jr Developer
 
 ⚠️ Este proyecto está protegido bajo licencia Creative Commons BY-NC.  
