@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/LogoFnet.png">
+    <title>Generar PDF de Header de Itinerario de Vuelo Agencia de Viajes</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --background-color: #f0f8ff;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-title img {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.5rem;
+        }
+
+        .mem {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-upload:hover {
+            background-color: #f0f0f0;
+        }
+
+        .file-upload-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-text {
+            text-align: center;
+        }
+
+        .file-name {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+
+        /* Estilos actualizados para la selección de plataforma */
+        .platform-templates {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .platform-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 150px;
+        }
+
+        .platform-option:hover,
+        .platform-option.selected {
+            border-color: var(--primary-color);
+            transform: scale(0.9);
+            background-color: #ffffff;
+        }
+
+        .platform-logo {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .platform-name {
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Estilos actualizados para la selección de aerolínea */
+        .airline-templates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .airline-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 3px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: calc(33.33% - 1rem);
+            max-width: 150px;
+        }
+
+        .airline-option:hover,
+        .airline-option.selected {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+            background-color: #e7f1ff;
+        }
+
+        .airline-logo {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 1.3rem;
+        }
+
+        .airline-name {
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .submit-button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .submit-button {
+            width: 50%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .status-message {
+            margin-top: 3rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-message.success {
+            color: green;
+        }
+
+        .status-message.error {
+            color: red;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        @media (max-width: 768px) {
+            .platform-templates {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .platform-option {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .airline-option {
+                width: calc(50% - 1rem);
+            }
+            .submit-button {
+                width: 50%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .airline-option {
+                width: 100%;
+            }
+            .submit-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <img src="{{ url_for('static', filename='membrete1.png') }}" alt="membrete" class="mem">
+                <h1 class="card-title">
+                    <img src="{{ url_for('static', filename='plane-icon.png') }}" alt="Plane Icon">
+                    Generar Itinerario de Vuelo
+                </h1>
+            </div>
+            <form id="pdfForm" action="/generate_pdf" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="pdf-upload" class="form-label">Subir archivo</label>
+                    <div class="file-upload" id="dropZone">
+                        <img src="{{ url_for('static', filename='upload-icon.png') }}" alt="Upload Icon" class="file-upload-icon">
+                        <div class="file-upload-text">
+                            <p><strong>Haga clic para cargar</strong> o arrastre y suelte</p>
+                            <p>PDF hasta 10MB</p>
+                        </div>
+                        <div id="file-name" class="file-name"></div>
+                        <input id="pdf-upload" type="file" name="pdf" accept="application/pdf" required class="sr-only">
+                    </div>
+                </div>
+                <br>
+
+                <div class="form-group">
+                    <label class="form-label">SELECCIONAR PLATAFORMA</label>
+                    <div class="platform-templates" id="platformTemplates">
+                        <div class="platform-option" data-value="templateA">
+                            <img src="{{ url_for('static', filename='logo-carnival.jpg') }}" alt="Carnival Tours" class="platform-logo">
+                            <span class="platform-name">CARNIVAL TOURS</span>
+                        </div>
+                        <div class="platform-option" data-value="templateB">
+                            <img src="{{ url_for('static', filename='logo-hub.jpg') }}" alt="Hub Travel" class="platform-logo">
+                            <span class="platform-name">HUB TRAVEL</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="templatePlat" id="selectedPlatform" required>
+                    <div id="platformError" class="error-message"></div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label class="form-label">SELECCIONAR AEROLINEAS</label>
+                    <div class="airline-templates" id="airlineTemplates">
+
+                        <div class="airline-option" data-value="template1">
+                            <img src="{{ url_for('static', filename='aa-logo.png') }}" alt="Aerolineas Argentinas" class="airline-logo">
+                            <span class="airline-name">Aerolineas Argentinas</span>
+                        </div>
+                        <div class="airline-option" data-value="template2">
+                            <img src="{{ url_for('static', filename='Aeromexico-Logo.png') }}" alt="AeroMexico" class="airline-logo">
+                            <span class="airline-name">AeroMexico</span>
+                        </div>
+                        <div class="airline-option" data-value="template3">
+                            <img src="{{ url_for('static', filename='Air-Airlines-Logo.png') }}" alt="Air Airlines" class="airline-logo">
+                            <span class="airline-name">Air Airlines</span>
+                        </div>
+                        <div class="airline-option" data-value="template4">
+                            <img src="{{ url_for('static', filename= 'Air-Canada-logo.png') }}" alt="Air Canada" class="airline-logo">
+                            <span class="airline-name">Air Canada</span>
+                        </div>
+                        <div class="airline-option" data-value="template5">
+                            <img src="{{ url_for('static', filename= 'Air-Europa-Logo.png') }}" alt="Air Europa" class="airline-logo">
+                            <span class="airline-name">Air Europa</span>
+                        </div>
+                        <div class="airline-option" data-value="template6">
+                            <img src="{{ url_for('static', filename= 'Air-France-Logo.png') }}" alt="Air France" class="airline-logo">
+                            <span class="airline-name">Air France</span>
+                        </div>
+                        <div class="airline-option" data-value="template7">
+                            <img src="{{ url_for('static', filename= 'Andes-Logo.png') }}" alt="Andes" class="airline-logo">
+                            <span class="airline-name">Andes</span>
+                        </div>
+                        <div class="airline-option" data-value="template8">
+                            <img src="{{ url_for('static', filename= 'Arajet-Logo.png') }}" alt="Arajet" class="airline-logo">
+                            <span class="airline-name">Arajet</span>
+                        </div>
+                        <div class="airline-option" data-value="template9">
+                            <img src="{{ url_for('static', filename= 'Avianca-logo.png') }}" alt="Avianca" class="airline-logo">
+                            <span class="airline-name">Avianca</span>
+                        </div>
+                        <div class="airline-option" data-value="template10">
+                            <img src="{{ url_for('static', filename= 'Boa-Logo.png') }}" alt="Boa" class="airline-logo">
+                            <span class="airline-name">Boa</span>
+                        </div>
+                        <div class="airline-option" data-value="template11">
+                            <img src="{{ url_for('static', filename= 'Copa-Airlines-logo.png') }}" alt="Copa Airlines" class="airline-logo">
+                            <span class="airline-name">Copa Airlines</span>
+                        </div>
+                        <div class="airline-option" data-value="template12">
+                            <img src="{{ url_for('static', filename= 'Delta-Airlines-Logo.png') }}" alt="Delta Airlines" class="airline-logo">
+                            <span class="airline-name">Delta Airlines</span>
+                        </div>
+                        <div class="airline-option" data-value="template13">
+                            <img src="{{ url_for('static', filename= 'Ethiopian-Logo.png') }}" alt="Ethiopian" class="airline-logo">
+                            <span class="airline-name">Ethiopian</span>
+                        </div>
+                        <div class="airline-option" data-value="template14">
+                            <img src="{{ url_for('static', filename= 'Etihad-Airways-Logo.png') }}" alt="Etihad Airways" class="airline-logo">
+                            <span class="airline-name">Etihad Airways</span>
+                        </div>
+                        <div class="airline-option" data-value="template15">
+                            <img src="{{ url_for('static', filename= 'Gol-Logo.png') }}" alt="Gol" class="airline-logo">
+                            <span class="airline-name">Gol</span>
+                        </div>
+                        <div class="airline-option" data-value="template16">
+                            <img src="{{ url_for('static', filename= 'Iberia-Logo.png') }}" alt="Iberia" class="airline-logo">
+                            <span class="airline-name">Iberia</span>
+                        </div>
+                        <div class="airline-option" data-value="template17">
+                            <img src="{{ url_for('static', filename= 'ITA-Airways-Logo.png') }}" alt="ITA Airways" class="airline-logo">
+                            <span class="airline-name">ITA Airways</span>
+                        </div>
+                        <div class="airline-option" data-value="template18">
+                            <img src="{{ url_for('static', filename= 'Jet-smart-logo.png') }}" alt="Jet Smart" class="airline-logo">
+                            <span class="airline-name">Jet Smart</span>
+                        </div>
+                        <div class="airline-option" data-value="template19">
+                            <img src="{{ url_for('static', filename= 'KLM-Logo.png') }}" alt="KLM" class="airline-logo">
+                            <span class="airline-name">KLM</span>
+                        </div>
+                        <div class="airline-option" data-value="template20">
+                            <img src="{{ url_for('static', filename= 'LATAM-Logo.png') }}" alt="Latam Airlines" class="airline-logo">
+                            <span class="airline-name">Latam Airlines</span>
+                        </div>
+                        <div class="airline-option" data-value="template21">
+                            <img src="{{ url_for('static', filename= 'Qatar-Airways-Logo.png') }}" alt="Qatar Airways" class="airline-logo">
+                            <span class="airline-name">Qatar Airways</span>
+                        </div>
+                        <div class="airline-option" data-value="template22">
+                            <img src="{{ url_for('static', filename= 'SA-Airways-Logo.png') }}" alt="South African Airways" class="airline-logo">
+                            <span class="airline-name">South African Airways</span>
+                        </div>
+                        <div class="airline-option" data-value="template23">
+                            <img src="{{ url_for('static', filename= 'Sky-Airline-Logo.png') }}" alt="Sky Airline" class="airline-logo">
+                            <span class="airline-name">Sky Airline</span>
+                        </div>
+                        <div class="airline-option" data-value="template24">
+                            <img src="{{ url_for('static', filename= 'Turkish-Airlines-Logo.png') }}" alt="Turkish Airlines" class="airline-logo">
+                            <span class="airline-name">Turkish Airlines</span>
+                        </div>
+                        <div class="airline-option" data-value="template25">
+                            <img src="{{ url_for('static', filename= 'United-Airlines-Logo.png') }}" alt="United Airlines" class="airline-logo">
+                            <span class="airline-name">United Airlines</span>
+                        </div>
+                        
+                    
+                        <!-- Agregar el resto de las opciones de aerolíneas aquí -->
+                    </div>
+                    <input type="hidden" name="template" id="selectedAirline" required>
+                    <div id="airlineError" class="error-message"></div>
+                </div>
+                <br>
+                <div class="submit-button-container">
+                    <button type="submit" class="submit-button">Generar ITINERARIO</button>
+                </div>
+            </form>
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="loading-content">
+            <p>Generando ITINERARIO...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('pdf-upload');
+            const fileNameDisplay = document.getElementById('file-name');
+            const platformTemplates = document.getElementById('platformTemplates');
+            const airlineTemplates = document.getElementById('airlineTemplates');
+            const form = document.getElementById('pdfForm');
+            const loading = document.getElementById('loading');
+            const statusMessage = document.getElementById('statusMessage');
+            const selectedPlatform = document.getElementById('selectedPlatform');
+            const selectedAirline = document.getElementById('selectedAirline');
+            const platformError = document.getElementById('platformError');
+            const airlineError = document.getElementById('airlineError');
+
+            // File upload functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropZone.classList.add('bg-gray-100');
+            }
+
+            function unhighlight() {
+                dropZone.classList.remove('bg-gray-100');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                updateFileName();
+            }
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', updateFileName);
+
+            function updateFileName() {
+                if (fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = `Archivo cargado: ${fileInput.files[0].name}`;
+                } else {
+                    fileNameDisplay.textContent = '';
+                }
+            }
+
+            // Template selection functionality
+            function setupTemplateSelection(container, hiddenInput, errorElement, optionClass) {
+                container.addEventListener('click', function(e) {
+                    const clickedOption = e.target.closest('.' + optionClass);
+                    if (clickedOption) {
+                        container.querySelectorAll('.' + optionClass).forEach(option => {
+                            option.classList.remove('selected');
+                        });
+                        clickedOption.classList.add('selected');
+                        hiddenInput.value = clickedOption.dataset.value;
+                        errorElement.textContent = '';
+                    }
+                });
+            }
+
+            setupTemplateSelection(platformTemplates, selectedPlatform, platformError, 'platform-option');
+            setupTemplateSelection(airlineTemplates, selectedAirline, airlineError, 'airline-option');
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validar selección de plataforma y aerolínea
+                let isValid = true;
+
+                if (!selectedPlatform.value) {
+                    platformError.textContent = 'Por favor, seleccione una plataforma.';
+                    isValid = false;
+                } else {
+                    platformError.textContent = '';
+                }
+
+                if (!selectedAirline.value) {
+                    airlineError.textContent = 'Por favor, seleccione una aerolínea.';
+                    isValid = false;
+                } else {
+                    airlineError.textContent = '';
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                const formData = new FormData(form);
+
+                loading.style.display = 'flex';
+                statusMessage.textContent = '';
+                statusMessage.className = 'status-message';
+
+                fetch('/generate_pdf', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    const contentType = response.headers.get("content-type");
+                    const contentDisposition = response.headers.get("content-disposition");
+                    let filename = "itinerario.pdf";
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+                        if (filenameMatch) {
+                        filename = filenameMatch[1];
+                        }
+                    }
+
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return response.json().then(data => {
+                            if (data.success) {
+                                statusMessage.textContent = 'PDF generado con éxito.';
+                                statusMessage.classList.add('success');
+                            } else {
+                                throw new Error(data.message);
+                            }
+                        });
+                    } else if (contentType && contentType.indexOf("application/pdf") !== -1) {
+                        return response.blob().then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            statusMessage.textContent = `ITINERARIO generado con éxito. La descarga de ${filename} ha comenzado.`;
+                            statusMessage.classList.add('success');
+                        });
+                    } else {
+                        throw new Error('Respuesta inesperada del servidor');
+                    }
+                })
+                .catch(error => {
+                    statusMessage.textContent = 'Error: ' + error.message;
+                    statusMessage.classList.add('error');
+                })
+                .finally(() => {
+                    loading.style.display = 'none';
+                });
+            });
+        });
+
+        window.onbeforeunload = function() {
+        // Enviar una solicitud al servidor para detener el servidor Flask al cerrar la ventana
+        fetch('/shutdown', {method: 'POST'});
+    };
+    </script>
+</body>
+</html>
